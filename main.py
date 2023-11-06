@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import os
 from dotenv import load_dotenv
 
@@ -6,7 +7,7 @@ load_dotenv('.env')
 
 intents = discord.Intents.all()
 
-bot = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 
 @bot.event
@@ -14,13 +15,21 @@ async def on_ready():
     print(f'We have logged in as {bot.user}')
 
 
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
+@bot.command(name='ping', aliases=['PING'])
+async def ping(ctx):
+    await ctx.channel.send('pong')
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello! ' + message.author.name)
+
+@bot.command(name='add', aliases=['ADD', 'aDD', 'Add'])
+async def add(ctx, a, b):
+    summe = float(a) + float(b)
+    await ctx.channel.send(f'{a} + {b} = {summe}')
+
+
+@add.error
+async def add_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Fehler: Es fehlen erforderliche Argumente. $add <Zahl1> <Zahl2>')
 
 
 TOKEN = os.getenv('TOKEN')
