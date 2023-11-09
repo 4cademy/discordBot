@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv
 import random
+from datetime import datetime
 
 load_dotenv('.env')
 
@@ -14,6 +15,16 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 @bot.event
 async def on_ready():
     print(f'We have logged in as {bot.user}')
+
+
+@bot.event
+async def on_voice_state_update(member, before, after):
+    if before.channel is None and after.channel is not None:
+        print(f'{datetime.now()}: {member.name} jointe Channel \"{after.channel}\"')
+    elif before.channel is not None and after.channel is None:
+        print(f'{datetime.now()}: {member.name} verließ Channel \"{before.channel}\"')
+    else:
+        print(f'{datetime.now()}: {member.name} bewegte sich \"{before.channel}\" -> \"{after.channel}\"')
 
 
 @bot.command(name='hello')
