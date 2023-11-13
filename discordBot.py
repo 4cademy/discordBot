@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import Embed
 import os
 from dotenv import load_dotenv
 import random
@@ -108,6 +109,73 @@ async def ssp_error(ctx, error):
         await ctx.send('Fehler: Fehlendes erforderliches Argumente. Format: **$ssp <Schere/Stein/Papier>**')
     elif isinstance(error, commands.BadArgument):
         await ctx.send('Fehler: Ungültiges Argument. Format: **$ssp <Schere/Stein/Papier>**')
+
+
+@bot.command(name='serverinfo')
+async def embed(ctx):
+    embed = Embed(
+        title='Server Info',
+        description='Auf diesem Server findest du:',
+        color=discord.Color.blue(),
+    )
+
+    embed.add_field(name='Name', value=ctx.guild, inline=True)
+
+    embed.add_field(name='ID', value=ctx.guild.id, inline=True)
+
+    embed.add_field(name='Erstellt am:', value=ctx.guild.created_at.strftime("%d.%m.%Y, %H:%M:%S"), inline=True)
+
+    embed.add_field(name='Mitglieder', value=ctx.guild.member_count, inline=True)
+
+    embed.add_field(name='Rollen', value=len(ctx.guild.roles), inline=True)
+
+    embed.add_field(name='Emojis', value=len(ctx.guild.emojis), inline=True)
+
+    embed.add_field(name='Kategorien', value=len(ctx.guild.categories), inline=True)
+
+    embed.add_field(name='Voice Channel', value=len(ctx.guild.voice_channels), inline=True)
+
+    embed.add_field(name='Text Channel', value=len(ctx.guild.text_channels), inline=True)
+
+    embed.set_footer(text='Du hast alle Infos bekommen!')
+
+    embed.set_thumbnail(url=ctx.guild.icon)
+
+    # embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
+
+    embed.timestamp = datetime.utcnow()
+
+    await ctx.channel.send(embed=embed)
+
+
+@bot.command(name='userinfo')
+async def embed(ctx, user: discord.Member=''):
+
+    if user == '':
+        user = ctx.author
+
+    embed = Embed(
+        title='User Info',
+        color=user.top_role.color
+    )
+
+    embed.add_field(name='Name', value=user.name, inline=True)
+
+    embed.add_field(name='ID', value=user.id, inline=True)
+
+    embed.add_field(name='Höchste Rolle', value=user.top_role, inline=True)
+
+    embed.add_field(name='Rollen', value=len(user.roles), inline=True)
+
+    embed.add_field(name='Beigetreten am', value=user.joined_at.strftime("%d.%m.%Y, %H:%M:%S"), inline=True)
+
+    embed.set_thumbnail(url=user.avatar)
+
+    # embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
+
+    embed.timestamp = datetime.utcnow()
+
+    await ctx.channel.send(embed=embed)
 
 
 TOKEN = os.getenv('TOKEN')
