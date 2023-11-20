@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 import random
 from datetime import datetime
+import time
 
 load_dotenv('.env')
 
@@ -55,19 +56,43 @@ async def muenzwurf(ctx, wahl):
     if wahl != 'Kopf' and wahl != 'Zahl':
         raise commands.BadArgument
 
-    await ctx.channel.send(f'Münze wird geworfen...')
+    embed = Embed(
+        title='Münzwurf',
+    )
+    msg = await ctx.channel.send(embed=embed)
+
+    embed.add_field(name='Werfen', value='', inline=False)
+
+    await msg.edit(embed=embed)
+
+    for i in range(3):
+        time.sleep(0.1)
+        embed.set_field_at(index=0, name='Werfen.', value='', inline=False)
+        await msg.edit(embed=embed)
+        time.sleep(0.1)
+        embed.set_field_at(index=0, name='Werfen..', value='', inline=False)
+        await msg.edit(embed=embed)
+        time.sleep(0.1)
+        embed.set_field_at(index=0, name='Werfen...', value='', inline=False)
+        await msg.edit(embed=embed)
+        time.sleep(0.1)
+        embed.set_field_at(index=0, name='Werfen', value='', inline=False)
+        await msg.edit(embed=embed)
+
     zahl = random.randint(0, 1)
     if zahl == 0:
         result = 'Kopf'
-        await ctx.channel.send(f':coin:')
     else:
         result = 'Zahl'
-        await ctx.channel.send(f':100:')
+
+    embed.set_field_at(index=0, name='Ergebnis:', value=result, inline=False)
 
     if wahl == result:
-        await ctx.channel.send(f'{ctx.author.mention} hat gewonnen!')
+        embed.add_field(name='Du hast gewonnen!', value='', inline=False)
     else:
-        await ctx.channel.send(f'{ctx.author.mention} hat verloren!')
+        embed.add_field(name='Du hast verloren.', value='', inline=False)
+
+    await msg.edit(embed=embed)
 
 
 @muenzwurf.error
@@ -89,18 +114,33 @@ async def ssp(ctx, wahl):
 
     com_no = random.randint(0, 2)
 
-    await ctx.channel.send(f'{emojis[user_no]} vs {emojis[com_no]}')
+    embed = Embed(
+        title='DUEL!',
+    )
+
+    embed.add_field(name='Du', value=emojis[user_no], inline=True)
+    msg = await ctx.channel.send(embed=embed)
+
+    embed.add_field(name='vs', value='', inline=True)
+    await msg.edit(embed=embed)
+
+    embed.add_field(name='Bot', value=emojis[com_no], inline=True)
+    await msg.edit(embed=embed)
 
     if user_no == 0 and com_no == 2:
-        await ctx.channel.send(f'Du hast gewonnen!')
+        result_msg = 'Du hast gewonnen!'
     elif user_no == 2 and com_no == 0:
-        await ctx.channel.send(f'Du hast verloren!')
+        result_msg = 'Du hast verloren!'
     elif user_no > com_no:
-        await ctx.channel.send(f'Du hast gewonnen!')
+        result_msg = 'Du hast gewonnen!'
     elif user_no < com_no:
-        await ctx.channel.send(f'Du hast verloren!')
+        result_msg = 'Du hast gewonnen!'
     else:
-        await ctx.channel.send(f'Unentschieden!')
+        result_msg = 'Unentschieden!'
+
+    embed.add_field(name=result_msg, value='', inline=True)
+
+    await msg.edit(embed=embed)
 
 
 @ssp.error
@@ -112,7 +152,7 @@ async def ssp_error(ctx, error):
 
 
 @bot.command(name='serverinfo')
-async def embed(ctx):
+async def serverinfo(ctx):
     embed = Embed(
         title='Server Info',
         description='Auf diesem Server findest du:',
@@ -149,7 +189,7 @@ async def embed(ctx):
 
 
 @bot.command(name='userinfo')
-async def embed(ctx, user: discord.Member=''):
+async def userinfo(ctx, user: discord.Member=''):
 
     if user == '':
         user = ctx.author
@@ -177,6 +217,29 @@ async def embed(ctx, user: discord.Member=''):
 
     await ctx.channel.send(embed=embed)
 
+
+@bot.command(name='editMsg')
+async def editMsg(ctx):
+    msg = await ctx.channel.send('Originale Nachricht')
+    time.sleep(5)
+    await msg.edit(content='Bearbeitete Nachricht')
+
+
+@bot.command(name='YN')
+async def YN(ctx, *question):
+    embed = Embed(
+        title='Umfrage von ' + ctx.author.name,
+        color=ctx.author.top_role.color
+    )
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
+
+    question = ' '.join(question)
+    embed.add_field(name='Frage:', value=f'{question}', inline=False)
+
+    msg = await ctx.channel.send(embed=embed)
+
+    await msg.add_reaction('👍')
+    await msg.add_reaction('👎')
 
 TOKEN = os.getenv('TOKEN')
 bot.run(TOKEN)
