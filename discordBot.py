@@ -221,8 +221,24 @@ async def userinfo(ctx, user: discord.Member=''):
 @bot.command(name='editMsg')
 async def editMsg(ctx):
     msg = await ctx.channel.send('Originale Nachricht')
-    time.sleep(5)
-    await msg.edit(content='Bearbeitete Nachricht')
+    time.sleep(2)
+    await msg.edit(content='**Bearbeitete Nachricht**')
+    time.sleep(2)
+    await msg.edit(content='*Bearbeitete Nachricht*')
+    time.sleep(2)
+    await msg.edit(content='__Bearbeitete Nachricht__')
+    time.sleep(2)
+    await msg.edit(content='~~Bearbeitete Nachricht~~')
+    time.sleep(2)
+    await msg.edit(content='||Bearbeitete Nachricht||')
+    time.sleep(2)
+    await msg.edit(content='> Bearbeitete Nachricht')
+    time.sleep(2)
+    await msg.edit(content='>>> Bearbeitete\nNachricht')
+    time.sleep(2)
+    await msg.edit(content='`Bearbeitete Nachricht`')
+    time.sleep(2)
+    await msg.edit(content='```\nBearbeitete\nNachricht\n```')
 
 
 @bot.command(name='YN')
@@ -240,6 +256,76 @@ async def YN(ctx, *question):
 
     await msg.add_reaction('👍')
     await msg.add_reaction('👎')
+
+
+@bot.command(name='helloWorld')
+async def helloWorld(ctx):
+    msg = await ctx.channel.send('```py\nprint(\'Hello World!\')\n```')
+
+
+@bot.command(name='code')
+async def code(ctx, lang, *codeblock):
+    codeblock = ' '.join(codeblock)
+    await ctx.channel.send(f'```{lang}\n{codeblock}\n```')
+
+
+@bot.command(name='createRole')
+async def createRole(ctx, rolename, color=discord.Color.blue()):
+    server = ctx.guild
+    if discord.utils.get(server.roles, name=rolename) is not None:
+        embed = Embed(
+            title='Rolleninfo',
+            color=discord.Color.red()
+        )
+        embed.add_field(name='Fehler:', value=f'Rolle **{rolename}** existiert bereits!', inline=True)
+    else:
+        await server.create_role(name=rolename, color=color)
+        embed = Embed(
+            title='Rolleninfo',
+            color=discord.Color.green()
+        )
+        embed.add_field(name='Rolle erstellt', value=f'**{rolename}**', inline=True)
+    await ctx.channel.send(embed=embed)
+
+
+@bot.command(name='setRole')
+async def setRole(ctx, rolename, user: discord.Member):
+    server = ctx.guild
+    role = discord.utils.get(server.roles, name=rolename)
+    if role is None:
+        embed = Embed(
+            title='Rolleninfo',
+            color=discord.Color.red()
+        )
+        embed.add_field(name='Fehler:', value=f'Rolle **{rolename}** existiert nicht!', inline=True)
+    else:
+        if role in user.roles:
+            await user.remove_roles(role)
+            embed = Embed(
+                title='Rolleninfo',
+                color=discord.Color.green()
+            )
+            embed.add_field(name='Rolle entfernt', value=f'**{rolename}**', inline=True)
+        else:
+            await user.add_roles(role)
+            embed = Embed(
+                title='Rolleninfo',
+                color=discord.Color.green()
+            )
+            embed.add_field(name='Rolle hinzugefügt', value=f'**{rolename}**', inline=True)
+    await ctx.channel.send(embed=embed)
+
+
+@bot.command(name='botColor')
+async def botColor(ctx):
+    server = ctx.guild
+    role = discord.utils.get(server.roles, name="ServerSurfer")
+
+    for i in range(0, 10):
+        color = random.randint(0, 0xFFFFFF)
+        await role.edit(color=color)
+        time.sleep(1)
+
 
 TOKEN = os.getenv('TOKEN')
 bot.run(TOKEN)
