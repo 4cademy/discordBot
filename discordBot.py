@@ -12,9 +12,9 @@ load_dotenv('.env')
 
 
 class User:
-    def __init__(self, user_id):
-        self.id = user_id
+    def __init__(self):
         self.coins = 100
+        self.daily = datetime.now().day-1
 
     def add_coins(self, coins):
         self.coins += coins
@@ -28,12 +28,19 @@ class User:
 
 user_data = {}
 
-if not os.path.exists('user_data.pkl'):
+
+def save_data():
     with open('user_data.pkl', 'wb') as f:
         pickle.dump(user_data, f)
-else:
-    with open('user_data.pkl', 'rb') as f:
-        user_data = pickle.load(f)
+
+
+def add_user(user_id):
+    if user_id not in user_data:
+        user_data[user_id] = User()
+        save_data()
+        return True
+    return False
+
 
 intents = discord.Intents.all()
 
@@ -42,6 +49,13 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 
 @bot.event
 async def on_ready():
+    global user_data
+    if not os.path.exists('user_data.pkl'):
+        with open('user_data.pkl', 'wb') as f:
+            pickle.dump(user_data, f)
+    else:
+        with open('user_data.pkl', 'rb') as f:
+            user_data = pickle.load(f)
     print(f'We have logged in as {bot.user}')
 
 
@@ -391,6 +405,15 @@ async def dice(ctx):
     embed.set_field_at(index=2, name='Ergebnis', value=result, inline=False)
 
     await ctx.channel.send(embed=embed)
+
+
+# Economy Commands
+@bot.command(name='join_economy')
+async def join_economy(ctx):
+    if add_user(ctx.author.id):
+        await ctx.channel.send(f'Willkommen in der Economy, {ctx.author.name}!')
+    else:
+        await ctx.channel.send(f'Du bist bereits in der Economy, {ctx.author.name}!')
 
 
 TOKEN = os.getenv('TOKEN')
