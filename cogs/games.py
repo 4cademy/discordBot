@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import Embed
 import time
 import random
+import asyncio
 
 
 class Games(commands.Cog):
@@ -142,5 +143,78 @@ class Games(commands.Cog):
     async def ssp_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send('Fehler: Fehlendes erforderliches Argumente. Format: **$ssp <Schere/Stein/Papier>**')
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send('Fehler: Ungültiges Argument. Format: **$ssp <Schere/Stein/Papier>**')
+
+    @commands.command(name='guess')
+    async def guess(self, ctx, min, max):
+        try:
+            min = int(min)
+            max = int(max)
+        except ValueError:
+            raise commands.BadArgument
+
+        number = random.randint(min, max)
+
+        embed = Embed(
+            title='Guess',
+            description=f'Guess a number between {min} and {max}.',
+            colour=discord.Colour.blue()
+        )
+        send_msg = await ctx.channel.send(embed=embed)
+
+        tries = 5
+        while tries > 0:
+            try:
+                msg = await self.bot.wait_for('message', timeout=10.0,
+                                              check=lambda message: message.author == ctx.author)
+                await msg.delete()
+            except asyncio.TimeoutError:
+                embed = discord.Embed(
+                    title='Timeout',
+                    description='Try again.',
+                    colour=discord.Colour.red()
+                )
+                await send_msg.edit(embed=embed)
+                return
+            else:
+                try:
+                    guess = int(msg.content)
+                except ValueError:
+                    embed = discord.Embed(
+                        title='Error',
+                        description='Enter a valid number.',
+                        colour=discord.Colour.yellow()
+                    )
+                    await send_msg.edit(embed=embed)
+                else:
+                    if guess == number:
+                        embed = Embed(
+                            title='Guess',
+                            description=f'You guessed the number {number} correctly.',
+                            colour=discord.Colour.green()
+                        )
+                        await send_msg.edit(embed=embed)
+                        break
+                    else:
+                        tries -= 1
+                        if tries == 0:
+                            embed = Embed(
+                                title='Guess',
+                                description=f'You guessed incorrectly. The number was {number}.',
+                                colour=discord.Colour.red()
+                            )
+                        else:
+                            embed = Embed(
+                                title='Guess',
+                                description=f'You guessed incorrectly. Try again. {tries} tries left.',
+                                colour=discord.Colour.red()
+                            )
+                        await send_msg.edit(embed=embed)
+
+    @guess.error
+    async def guess_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send('Fehler: Fehlendes erforderliches Argumente. Format: **$guess <min> <max>**')
         elif isinstance(error, commands.BadArgument):
             await ctx.send('Fehler: Ungültiges Argument. Format: **$ssp <Schere/Stein/Papier>**')
