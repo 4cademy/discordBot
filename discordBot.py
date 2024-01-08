@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 from discord import Embed
 import os
 from dotenv import load_dotenv
@@ -11,6 +12,7 @@ import pickle
 from cogs.games import Games
 from cogs.help import CustomHelp
 from cogs.maths import Maths
+from cogs.slashs import Slashs
 
 load_dotenv('.env')
 
@@ -55,6 +57,14 @@ bot = commands.Bot(command_prefix='$', description='This is Marcels bot', help_c
 async def on_ready():
     await bot.add_cog(Games(bot))
     await bot.add_cog(Maths(bot))
+    await bot.add_cog(Slashs(bot))
+
+    try:
+        synced = await bot.tree.sync()
+        print(f'Synced {len(synced)} application commands')
+    except Exception as e:
+        print(f'Failed to sync application commands: {e}')
+
     global user_data
     if not os.path.exists('user_data.pkl'):
         with open('user_data.pkl', 'wb') as f:
