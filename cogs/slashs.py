@@ -4,6 +4,9 @@ from discord import app_commands, Embed
 import typing
 import random
 
+import requests
+import json
+
 yes = {'yes', 'y', 'ja', 'j', 'true', 't', '1'}
 
 
@@ -85,3 +88,26 @@ class Slashs(commands.Cog):
         await user.add_roles(role)
 
         await interaction.response.send_message(f'Du hast die Rolle <@&{role.id}> erhalten.')
+
+    @app_commands.command(name='meme')
+    async def meme(self, interaction: discord.Interaction):
+        while True:
+            response = requests.get('https://meme-api.com/gimme')
+            json_data = json.loads(response.text)
+
+            nsfw = True
+            if not json_data['nsfw']:
+                nsfw = False
+
+            upvotes = json_data['ups']
+            print(upvotes)
+
+            if upvotes >= 100 and not nsfw and json_data['url']:
+                break
+
+        embed = Embed(
+            title=json_data['title'],
+            color=discord.Color.green()
+        )
+        embed.set_image(url=json_data['url'])
+        await interaction.response.send_message(embed=embed)

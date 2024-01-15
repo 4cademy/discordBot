@@ -9,6 +9,8 @@ from datetime import datetime
 import time
 import pickle
 
+
+
 from cogs.games import Games
 from cogs.help import CustomHelp
 from cogs.maths import Maths
@@ -144,35 +146,6 @@ async def serverinfo(ctx):
     await ctx.channel.send(embed=embed)
 
 
-@bot.command(name='userinfo')
-async def userinfo(ctx, user: discord.Member = ''):
-    if user == '':
-        user = ctx.author
-
-    embed = Embed(
-        title='User Info',
-        color=user.top_role.color
-    )
-
-    embed.add_field(name='Name', value=user.name, inline=True)
-
-    embed.add_field(name='ID', value=user.id, inline=True)
-
-    embed.add_field(name='Höchste Rolle', value=user.top_role, inline=True)
-
-    embed.add_field(name='Rollen', value=len(user.roles), inline=True)
-
-    embed.add_field(name='Beigetreten am', value=user.joined_at.strftime("%d.%m.%Y, %H:%M:%S"), inline=True)
-
-    embed.set_thumbnail(url=user.avatar)
-
-    # embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
-
-    embed.timestamp = datetime.utcnow()
-
-    await ctx.channel.send(embed=embed)
-
-
 @bot.command(name='editMsg')
 async def editMsg(ctx):
     msg = await ctx.channel.send('Originale Nachricht')
@@ -284,6 +257,40 @@ async def join_economy(ctx):
         await ctx.channel.send(f'Willkommen in der Economy, {ctx.author.name}!')
     else:
         await ctx.channel.send(f'Du bist bereits in der Economy, {ctx.author.name}!')
+
+
+@bot.tree.context_menu(name='Get Joined Date')
+async def get_joined_date(interaction: discord.Interaction, user: discord.Member):
+    await interaction.response.send_message(f'{user.name} joined on {discord.utils.format_dt(user.joined_at)}', ephemeral=True)
+
+
+@bot.tree.context_menu(name='User Info')
+async def userinfo(interaction: discord.Interaction, user: discord.Member):
+    embed = Embed(
+        title='User Info',
+        color=user.top_role.color
+    )
+
+    embed.add_field(name='Name', value=user.name, inline=True)
+
+    embed.add_field(name='ID', value=user.id, inline=True)
+
+    embed.add_field(name='Höchste Rolle', value=user.top_role, inline=True)
+
+    embed.add_field(name='Rollen', value=len(user.roles), inline=True)
+
+    embed.add_field(name='Auf Discord seit', value=discord.utils.format_dt(user.created_at), inline=True)
+
+    embed.add_field(name='Server beigetreten am', value=discord.utils.format_dt(user.joined_at), inline=True)
+
+    embed.set_thumbnail(url=user.avatar)
+
+    # embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar)
+
+    embed.timestamp = datetime.utcnow()
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 
 TOKEN = os.getenv('TOKEN')

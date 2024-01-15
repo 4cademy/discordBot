@@ -218,3 +218,4 @@ class Games(commands.Cog):
             await ctx.send('Fehler: Fehlendes erforderliches Argumente. Format: **$guess <min> <max>**')
         elif isinstance(error, commands.BadArgument):
             await ctx.send('Fehler: Ungültiges Argument. Format: **$ssp <Schere/Stein/Papier>**')
+
