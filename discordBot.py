@@ -10,31 +10,14 @@ import time
 import pickle
 
 
-
 from cogs.games import Games
 from cogs.help import CustomHelp
 from cogs.maths import Maths
 from cogs.slashs import Slashs
+from cogs.economy import Economy
+from cogs.economy import User
 
 load_dotenv('.env')
-
-
-class User:
-    def __init__(self):
-        self.coins = 100
-        self.daily = datetime.now().day-1
-
-    def add_coins(self, coins):
-        self.coins += coins
-
-    def remove_coins(self, coins):
-        if self.coins >= coins:
-            self.coins -= coins
-            return True
-        return False
-
-
-user_data = {}
 
 
 def save_data():
@@ -60,6 +43,7 @@ async def on_ready():
     await bot.add_cog(Games(bot))
     await bot.add_cog(Maths(bot))
     await bot.add_cog(Slashs(bot))
+    await bot.add_cog(Economy(bot))
 
     try:
         synced = await bot.tree.sync()
@@ -67,13 +51,6 @@ async def on_ready():
     except Exception as e:
         print(f'Failed to sync application commands: {e}')
 
-    global user_data
-    if not os.path.exists('user_data.pkl'):
-        with open('user_data.pkl', 'wb') as f:
-            pickle.dump(user_data, f)
-    else:
-        with open('user_data.pkl', 'rb') as f:
-            user_data = pickle.load(f)
     print(f'We have logged in as {bot.user}')
 
 
