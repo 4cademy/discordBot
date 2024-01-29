@@ -15,9 +15,14 @@ daily_amount = 100
 sad_money_cat_img = 'https://i.redd.it/uef724gewgf11.jpg'
 stonks_img = 'https://printler.com/media/photo/150382.jpg'
 make_it_rain_gif = 'https://c.tenor.com/lUhOtb4IYxAAAAAd/tenor.gif'
+money_printer_gif = 'https://media1.tenor.com/m/SodieCmOhMIAAAAd/jerome-powell-powell.gif'
 
 
 def save_data():
+    ic(economy_data)
+    for user_id in economy_data:
+        print(user_id)
+        print(economy_data[user_id])
     with open('economy_data.pkl', 'wb') as f:
         pickle.dump(economy_data, f)
 
@@ -171,3 +176,30 @@ class Economy(commands.Cog):
                     embed = send_not_enough_coins(send_user_id)
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @app_commands.command(name='print_money')
+    async def print_money(self, interaction: discord.Interaction, user: discord.Member, amount: int):
+        if interaction.user.guild_permissions.administrator:
+            user_id = user.id
+
+            already_joined, embed = user_in_economy(user_id)
+            if already_joined:
+                economy_data[user_id].add_coins(amount)
+                save_data()
+
+                embed = Embed(
+                    title='Economy',
+                    color=discord.Color.green()
+                )
+                embed.set_image(url=money_printer_gif)
+                embed.add_field(name='', value=f'**Die Zentralbank hat {amount} 🪙 gedruckt und {user.mention} gegeben.**', inline=True)
+                await interaction.response.send_message(embed=embed)
+            else:
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+        else:
+            embed = Embed(
+                title='Economy',
+                color=discord.Color.red()
+            )
+            embed.add_field(name='', value=f'**Du hast keine Berechtigung.**', inline=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
