@@ -19,20 +19,6 @@ from cogs.economy import User
 
 load_dotenv('.env')
 
-
-def save_data():
-    with open('user_data.pkl', 'wb') as f:
-        pickle.dump(user_data, f)
-
-
-def add_user(user_id):
-    if user_id not in user_data:
-        user_data[user_id] = User()
-        save_data()
-        return True
-    return False
-
-
 intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='$', description='This is Marcels bot', help_command=CustomHelp(), intents=intents)
@@ -225,15 +211,6 @@ async def botColor(ctx):
         color = random.randint(0, 0xFFFFFF)
         await role.edit(color=color)
         time.sleep(1)
-
-
-# Economy Commands
-@bot.command(name='join_economy')
-async def join_economy(ctx):
-    if add_user(ctx.author.id):
-        await ctx.channel.send(f'Willkommen in der Economy, {ctx.author.name}!')
-    else:
-        await ctx.channel.send(f'Du bist bereits in der Economy, {ctx.author.name}!')
 
 
 @bot.tree.context_menu(name='Get Joined Date')
